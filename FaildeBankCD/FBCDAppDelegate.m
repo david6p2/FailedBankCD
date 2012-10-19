@@ -10,6 +10,9 @@
 
 #import "FBCDMasterViewController.h"
 
+#import "FailedBankInfo.h"
+#import "FailedBankDetails.h"
+
 @implementation FBCDAppDelegate
 
 @synthesize managedObjectContext = _managedObjectContext;
@@ -21,23 +24,23 @@
     //grab a pointer to our managed object context using the helper function that comes included with the template
     NSManagedObjectContext *context = [self managedObjectContext];
     
-    //create a new instance of an NSManagedObject for our FailedBankInfo entity
-    NSManagedObject *failedBankInfo = [NSEntityDescription
-                                       insertNewObjectForEntityForName:@"FailedBankInfo"
-                                       inManagedObjectContext:context];
+    //create a new instance of an FailedBankInfo Object for our FailedBankInfo entity
+    FailedBankInfo *failedBankInfo = [NSEntityDescription
+                                      insertNewObjectForEntityForName:@"FailedBankInfo"
+                                      inManagedObjectContext:context];
     
     //set up a test bank, for both FailedBankInfo and FailedBankDetails
-    [failedBankInfo setValue:@"Test Bank" forKey:@"name"];
-    [failedBankInfo setValue:@"Testville" forKey:@"city"];
-    [failedBankInfo setValue:@"Testland" forKey:@"state"];
-    NSManagedObject *failedBankDetails = [NSEntityDescription
-                                          insertNewObjectForEntityForName:@"FailedBankDetails"
-                                          inManagedObjectContext:context];
-    [failedBankDetails setValue:[NSDate date] forKey:@"closeDate"];
-    [failedBankDetails setValue:[NSDate date] forKey:@"updateDate"];
-    [failedBankDetails setValue:[NSNumber numberWithInt:12345] forKey:@"zip"];
-    [failedBankDetails setValue:failedBankInfo forKey:@"info"];
-    [failedBankInfo setValue:failedBankDetails forKey:@"details"];
+    failedBankInfo.name = @"Test Bank";
+    failedBankInfo.city = @"Testville";
+    failedBankInfo.state = @"Testland";
+    FailedBankDetails *failedBankDetails = [NSEntityDescription
+                                            insertNewObjectForEntityForName:@"FailedBankDetails"
+                                            inManagedObjectContext:context];
+    failedBankDetails.closeDate = [NSDate date];
+    failedBankDetails.updateDate = [NSDate date];
+    failedBankDetails.zip = [NSNumber numberWithInt:12345];
+    failedBankDetails.info = failedBankInfo;
+    failedBankInfo.details = failedBankDetails;
     
     //At this point the objects are just modified in memory
     //to store them back to the database we need to call save on the managedObjectContext.
@@ -58,11 +61,11 @@
     //to pull all of the objects in the FailedBankInfo table into our “scratch pad”
     NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest
                                                      error:&error];
-    //iterate through each NSManagedObject, and use valueForKey to pull out various pieces.
-    for (NSManagedObject *info in fetchedObjects) {
-        NSLog(@"Name: %@", [info valueForKey:@"name"]);
-        NSManagedObject *details = [info valueForKey:@"details"];
-        NSLog(@"Zip: %@", [details valueForKey:@"zip"]);
+    //iterate through each FailedBankInfo Object, and use their @properties to pull out various pieces.
+    for (FailedBankInfo *info in fetchedObjects) {
+        NSLog(@"Name: %@", info.name);
+        FailedBankDetails *details = info.details;
+        NSLog(@"Zip: %@", details.zip);
     }
     
     // Override point for customization after application launch.
