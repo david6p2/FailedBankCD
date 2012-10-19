@@ -9,12 +9,13 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+@class FailedBankInfo;
 
 @interface FailedBankDetails : NSManagedObject
 
 @property (nonatomic, retain) NSDate * closeDate;
 @property (nonatomic, retain) NSDate * updateDate;
 @property (nonatomic, retain) NSNumber * zip;
-@property (nonatomic, retain) NSManagedObject *info;
+@property (nonatomic, retain) FailedBankInfo *info;
 
 @end
