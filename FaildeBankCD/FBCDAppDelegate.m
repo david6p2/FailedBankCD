@@ -1,6 +1,6 @@
 //
 //  FBCDAppDelegate.m
-//  FaildeBankCD
+//  FailedBankCD
 //
 //  Created by David Cespedes on 19/10/12.
 //  Copyright (c) 2012 LSR Marketing Service. All rights reserved.
@@ -18,6 +18,53 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    //grab a pointer to our managed object context using the helper function that comes included with the template
+    NSManagedObjectContext *context = [self managedObjectContext];
+    
+    //create a new instance of an NSManagedObject for our FailedBankInfo entity
+    NSManagedObject *failedBankInfo = [NSEntityDescription
+                                       insertNewObjectForEntityForName:@"FailedBankInfo"
+                                       inManagedObjectContext:context];
+    
+    //set up a test bank, for both FailedBankInfo and FailedBankDetails
+    [failedBankInfo setValue:@"Test Bank" forKey:@"name"];
+    [failedBankInfo setValue:@"Testville" forKey:@"city"];
+    [failedBankInfo setValue:@"Testland" forKey:@"state"];
+    NSManagedObject *failedBankDetails = [NSEntityDescription
+                                          insertNewObjectForEntityForName:@"FailedBankDetails"
+                                          inManagedObjectContext:context];
+    [failedBankDetails setValue:[NSDate date] forKey:@"closeDate"];
+    [failedBankDetails setValue:[NSDate date] forKey:@"updateDate"];
+    [failedBankDetails setValue:[NSNumber numberWithInt:12345] forKey:@"zip"];
+    [failedBankDetails setValue:failedBankInfo forKey:@"info"];
+    [failedBankInfo setValue:failedBankDetails forKey:@"details"];
+    
+    //At this point the objects are just modified in memory
+    //to store them back to the database we need to call save on the managedObjectContext.
+    NSError *error;
+    if (![context save:&error]) {
+        NSLog(@"Whoops, couldn't save: %@", [error localizedDescription]);
+    }
+    
+    //list out all the objects currently in the database
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    //We call entityForName to get a pointer to the FailedBankInfo entity we want to retrieve
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"FailedBankInfo"
+                                              inManagedObjectContext:context];
+    //and then use setEntity to tell our fetch request that’s the kind of Entity we want
+    [fetchRequest setEntity:entity];
+    
+    //call executeFetchRequest on the managed object context
+    //to pull all of the objects in the FailedBankInfo table into our “scratch pad”
+    NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest
+                                                     error:&error];
+    //iterate through each NSManagedObject, and use valueForKey to pull out various pieces.
+    for (NSManagedObject *info in fetchedObjects) {
+        NSLog(@"Name: %@", [info valueForKey:@"name"]);
+        NSManagedObject *details = [info valueForKey:@"details"];
+        NSLog(@"Zip: %@", [details valueForKey:@"zip"]);
+    }
+    
     // Override point for customization after application launch.
     UINavigationController *navigationController = (UINavigationController *)self.window.rootViewController;
     FBCDMasterViewController *controller = (FBCDMasterViewController *)navigationController.topViewController;
@@ -92,7 +139,7 @@
     if (_managedObjectModel != nil) {
         return _managedObjectModel;
     }
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"FaildeBankCD" withExtension:@"momd"];
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"FailedBankCD" withExtension:@"momd"];
     _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     return _managedObjectModel;
 }
@@ -105,7 +152,7 @@
         return _persistentStoreCoordinator;
     }
     
-    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"FaildeBankCD.sqlite"];
+    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"FailedBankCD.sqlite"];
     
     NSError *error = nil;
     _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];

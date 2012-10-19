@@ -1,6 +1,6 @@
 //
 //  FBCDMasterViewController.m
-//  FaildeBankCD
+//  FailedBankCD
 //
 //  Created by David Cespedes on 19/10/12.
 //  Copyright (c) 2012 LSR Marketing Service. All rights reserved.
@@ -13,6 +13,8 @@
 @end
 
 @implementation FBCDMasterViewController
+
+@synthesize managedObjectContext;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
